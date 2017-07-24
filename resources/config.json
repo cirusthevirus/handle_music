@@ -1,0 +1,14 @@
+{
+    "consumer_key": "your-consumer-key",
+    "consumer_secret": "your-consumer-secret",
+    "user_agent": "handle_music/1.0",
+    "access_token": null,
+    "access_secret": null,
+    "source": "/Users/jakob_beckmann/Music/dldd_music/temp",
+    "destination": "/Users/jakob_beckmann/Music/dldd_music/dldd",
+    "invalid_tags": "audio|premiere|original|official|lyric|records|exclusive",
+    "feature_tags": " with | feat | feat. | ft | ft. ",
+    "feature2_tags": "\\(feat |\\(feat. |\\(ft |\\(ft. ",
+    "and_tags": " vs | vs. | x |, | & | \\(",
+    "logging": true
+}
