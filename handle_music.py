@@ -61,6 +61,9 @@ except ImportError:
     import shared_data as sd
 
 
+sd.CONFIG_PATH = os.path.expanduser("resources/config.json")
+
+
 
 # Create debug logger and logger liked to terminal
 terminal = pt.Logger()
@@ -71,7 +74,7 @@ sd.debugger = debugger
 sd.terminal = terminal
 
 try:
-    with open("resources/config.json", 'r') as fh:
+    with open(sd.CONFIG_PATH, 'r') as fh:
         settings = json.load(fh)
 except FileNotFoundError:
     debugger.write("Failed to load configuration file.", prefix="[-]")
@@ -86,6 +89,13 @@ debugger.write("Successfully loaded settings.")
 if not settings["logging"]:
     debugger.write("Debug logger is getting disabled.")
     debugger.disable()
+
+# Set up regular expression compilations
+sd.and_ = re.compile(settings["and_tags"], re.IGNORECASE)
+sd.feat = re.compile(settings["feature_tags"], re.IGNORECASE)
+sd.feat2 = re.compile(settings["feature2_tags"], re.IGNORECASE)
+sd.invalid = re.compile(settings["invalid_tags"], re.IGNORECASE)
+
 
 # Get command line arguments
 args = sys.argv
@@ -172,7 +182,7 @@ elif len(args) == 2:
         debugger.write("{} called.".format(args[1]))
         settings["logging"] = False
         try:
-            with open("resources/config.json", 'w') as fh:
+            with open(sd.CONFIG_PATH, 'w') as fh:
                 json.dump(settings, fh, indent=4)
         except FileNotFoundError:
             terminal.write("Please ensure the existence of the " +
@@ -186,7 +196,7 @@ elif len(args) == 2:
         debugger.write("{} called.".format(args[1]))
         settings["logging"] = True
         try:
-            with open("resources/config.json", 'w') as fh:
+            with open(sd.CONFIG_PATH, 'w') as fh:
                 json.dump(settings, fh, indent=4)
         except FileNotFoundError:
             terminal.write("Please ensure the existence of the " +
@@ -222,7 +232,7 @@ elif len(args) == 3:
         path = os.path.abspath(path)
         settings["source"] = path
         try:
-            with open("resources/config.json", 'w') as fh:
+            with open(sd.CONFIG_PATH, 'w') as fh:
                 json.dump(settings, fh, indent=4)
         except FileNotFoundError:
             terminal.write("Please ensure the existence of the " +
@@ -238,7 +248,7 @@ elif len(args) == 3:
         path = os.path.abspath(path)
         settings["destination"] = path
         try:
-            with open("resources/config.json", 'w') as fh:
+            with open(sd.CONFIG_PATH, 'w') as fh:
                 json.dump(settings, fh, indent=4)
         except FileNotFoundError:
             terminal.write("Please ensure the existence of the " +

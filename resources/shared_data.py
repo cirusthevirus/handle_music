@@ -3,6 +3,15 @@
 Defines shared data for all modules.
 """
 
+CONGIF_PATH = None
+
+# RE patterns
+and_ = None
+feat = None
+feat2 = None
+invalid = None
+
+
 # Loggers
 debugger = None
 terminal = None
