@@ -88,7 +88,7 @@ def get_artwork(files=None):
         settings["access_secret"] = access_secret
 
         try:
-            with open("resources/config.json", 'w') as fh:
+            with open(sd.CONFIG_PATH, 'w') as fh:
                 json.dump(settings, fh, indent=4)
         except FileNotFoundError:
             terminal.write("Please ensure the existence of the " +
@@ -118,7 +118,7 @@ def get_artwork(files=None):
             settings["access_secret"] = None
 
             try:
-                with open("resources/config.json", 'w') as fh:
+                with open(sd.CONFIG_PATH, 'w') as fh:
                     json.dump(settings, fh, indent=4)
             except FileNotFoundError:
                 terminal.write("Please ensure the existence of the " +
@@ -184,8 +184,8 @@ def get_artwork(files=None):
         # Get artist name from id3 tags
         tag_list = EasyID3(file)
         artist = str(tag_list["artist"][0])
-        artist = re.split(settings["and_tags"], artist)[0].strip()
-        artist = re.split(settings["feature_tags"], artist)[0].strip()
+        artist = re.split(sd.and_, artist)[0].strip()
+        artist = re.split(sd.feat, artist)[0].strip()
 
         results = ds.search(artist, type="artist")
 
@@ -237,6 +237,8 @@ def id3_correct(files=None):
     Returns:
         List of processed files.
     """
+    # Set up return value
+    result = []
 
     # Set up loggers and settings
     terminal = sd.terminal
@@ -291,8 +293,8 @@ def id3_correct(files=None):
     for file in files:
         # Change file name and replace feat flag with 'ft.'
         head, basename = os.path.split(file)
-        basename = re.sub(settings["feature_tags"], ' ft. ', basename)
-        basename = re.sub(settings["feature2_tags"], '(ft. ', basename)
+        basename = re.sub(sd.feat, ' ft. ', basename)
+        basename = re.sub(sd.feat2, '(ft. ', basename)
         tmp_file = os.path.join(head, basename)
 
         os.rename(file, tmp_file)
@@ -300,9 +302,10 @@ def id3_correct(files=None):
 
 
         tags = re.split(' - ', basename)
-        if re.search(settings["invalid_tags"], basename) or len(tags) != 2:
+        if re.search(sd.invalid, basename) or len(tags) != 2:
             os.rename(file, os.path.join(source, "_invalid", basename))
-            files.remove(file)
+            pg.inc_and_print()
+            continue
         else:
             tag_list[file] = EasyID3(file)
 
@@ -315,13 +318,15 @@ def id3_correct(files=None):
             tag_list[file]['title'] = title_name
             tag_list[file].save()
 
+            result.append(file)
+
         pg.inc_and_print()
 
     terminal.write("Process complete.")
     debugger.write("id3_correct completed with {} files.".format(
-            len(files)))
+            len(result)))
 
-    return files
+    return result
 
 ###############################################################################
 ###############################################################################
@@ -397,8 +402,6 @@ def file_copy(files=None):
         # Get artist name from id3 tags
         tag_list = EasyID3(file)
         artist = str(tag_list["artist"][0])
-        artist = re.split(settings["and_tags"], artist)[0].strip()
-        artist = re.split(settings["feature_tags"], artist)[0].strip()
 
         try:
             os.mkdir(os.path.join(destination, artist))
@@ -493,8 +496,6 @@ def file_move(files=None):
         # Get artist name from id3 tags
         tag_list = EasyID3(file)
         artist = str(tag_list["artist"][0])
-        artist = re.split(settings["and_tags"], artist)[0].strip()
-        artist = re.split(settings["feature_tags"], artist)[0].strip()
 
         try:
             os.mkdir(os.path.join(destination, artist))
