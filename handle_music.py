@@ -28,7 +28,7 @@ modules to run.
         clear       Clear all data stored in debugging log file.
         log_info    Retrieve information about debug logging.
         log_off     Turn off debug logging.
-        log_on      Turn on debut logging.
+        log_on      Turn on debug logging.
         settings    Prints the settings.
 
         <option>_help
@@ -61,7 +61,7 @@ except ImportError:
     import shared_data as sd
 
 
-sd.CONFIG_PATH = os.path.expanduser("resources/config.json")
+sd.CONFIG_PATH = os.path.expanduser("~/utils/handle_music.json")
 
 
 
@@ -124,6 +124,10 @@ elif len(args) == 2:
         debugger.write("{} called.".format(args[1]))
         print(pt.trim_docstring(actn.file_move.__doc__))
 
+    elif args[1] == "uploads_help":
+        debugger.write("{} called.".format(args[1]))
+        print(pt.trim_docstring(actn.find_uploads.__doc__))
+
     #######################################################################
     # MUSIC COMMANDS
     elif args[1] == "art":
@@ -151,6 +155,10 @@ elif len(args) == 2:
         debugger.write("copy internally called.")
         files = actn.file_copy(files)
 
+    elif args[1] == "uploads":
+        debugger.write("{} called.".format(args[1]))
+        actn.find_uploads()
+
     #######################################################################
     # CHANGE DEFAULT SETTINGS HELP MESSAGES
     elif args[1] == "set_source":
@@ -176,7 +184,7 @@ elif len(args) == 2:
         info = debugger.get_info()
         terminal.write("Log file information:")
         for key, value in info.items():
-            terminal.write("{}: {}".format(key, value))
+            terminal.write("{:<20}{}".format(key, value))
 
     elif args[1] == "log_off":
         debugger.write("{} called.".format(args[1]))

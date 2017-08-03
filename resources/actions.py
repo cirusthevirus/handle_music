@@ -10,6 +10,7 @@ import re
 import os
 import shutil
 import webbrowser
+import time
 import sys
 import json
 
@@ -515,3 +516,119 @@ def file_move(files=None):
             len(files)))
 
     return files
+
+
+###############################################################################
+###############################################################################
+
+def find_uploads():
+    """
+    Requests user input for a date and source directory, then filters the
+    songs having been modified after said date. This command either prints to
+    the terminal or copies files to a destination directory.
+    Note that the default DESTINATION directory in the settings is used as
+    default source for the file filtering.
+
+    Returns:
+        List of processed files.
+    """
+    # Set up loggers and settings
+    terminal = sd.terminal
+    debugger = sd.debugger
+    settings = sd.settings
+
+    # Request source directory
+    terminal.write("Default source directory: {}".format(
+            settings["destination"]))
+    source = input("Please enter source or leave empty for " +
+                        "default:\n")
+    if not source:
+        source = settings["destination"]
+
+    while not os.path.exists(source):
+        source = input("Directory does not exist, please try again:\n")
+        if not source:
+            source = settings["destination"]
+
+    debugger.write("Source: {}.".format(source))
+
+    # Get timestamp
+    _input = input("Please enter a timestamp (dd/mm/yy) to filter music by: ")
+    _input = _input.strip()
+    debugger.write("Date entered: {}".format(_input))
+    ts = time.strptime(_input, "%d/%m/%y")
+
+    # Get all files in source directory
+    _files = pt.find_files(source, "*.mp3")
+
+    # Filter out files that have been modified after specified date
+    files = [file for file in _files if \
+             time.gmtime(os.path.getmtime(file)) > ts]
+
+    debugger.write("{} files found.".format(len(files)))
+    terminal.write("{} files found.".format(len(files)))
+
+    print_to_ter = input("Copy files instead of printing to termianl? [y/n]: ")
+    if print_to_ter == "y":
+        print_to_ter = False
+    else:
+        print_to_ter = True
+
+    debugger.write("Print to terminal: {}".format(print_to_ter))
+
+    if not print_to_ter:
+        destination = input("Please provide a destination directory:\n")
+        while not os.path.exists(destination):
+            destination = input("Directory doesn't exist, please try again:\n")
+
+        debugger.write("Destination: {}".format(destination))
+        terminal.write("Preparing to copy files ...")
+        pg = pt.ProgressBar(len(files))
+        pg.print()
+
+        for file in files:
+            # Get artist name from id3 tags
+            tag_list = EasyID3(file)
+            artist = str(tag_list["artist"][0])
+
+            try:
+                os.mkdir(os.path.join(destination, artist))
+            except FileExistsError:
+                debugger.write("Folder '{}' already exists.".format(artist))
+
+            basename = os.path.basename(file)
+            try:
+                shutil.copy2(file, os.path.join(destination, artist, basename))
+            except:
+                debugger.write("Error copying file {}".format(file),
+                               prefix="[-]")
+
+            pg.inc_and_print()
+
+        terminal.write("Process complete.")
+        debugger.write("find_uploads completed with {} files.".format(
+                len(files)))
+
+        return files
+    else:
+        terminal.write("In source: {}".format(source))
+        for file in files:
+            terminal.write(os.path.basename(file), prefix="  - ")
+
+        debugger.write("find_uploads completed with {} files.".format(
+                len(files)))
+
+        return files
+
+
+
+
+
+
+
+
+
+
+
+
+
