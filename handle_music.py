@@ -61,7 +61,7 @@ except ImportError:
     import shared_data as sd
 
 
-sd.CONFIG_PATH = os.path.expanduser("~/utils/handle_music.json")
+sd.CONFIG_PATH = os.path.expanduser("resources/handle_music.json")
 
 
 
